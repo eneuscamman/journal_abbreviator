@@ -72,13 +72,27 @@ replacements = [ ['The Journal of Chemical Physics' , 'J. Chem. Phys.'],
                  ['Israel Journal of Chemistry', 'Isr. J. Chem.'],
                ]
 
-# open original bib file
+# get name of the original bib file
 orig_file_name = sys.argv[1]
-f = open(sys.argv[1], 'r')
+
+# get name for the temporary file we will write to
+temp_file_name = 'temp_' + orig_file_name
+maxit = 30
+for i in range(maxit+5):
+  if not os.path.exists(temp_file_name):
+    break
+  elif i == maxit:
+    raise RuntimeError('failed to create a file name for the abbreviation temporary file')
+  else:
+    temp_file_name = 'x' + temp_file_name
+
+# open original bib file
+f = open(orig_file_name, 'r')
 
 # open new bib file to be written
-abbrev_file_name = 'abbrev_' + sys.argv[1]
-g = open(abbrev_file_name, 'w')
+g = open(temp_file_name, 'w')
+
+# loop over the lines in the original file and make replacements as appropriate
 for original_line in f:
 
   # only edit journal lines
@@ -95,9 +109,10 @@ for original_line in f:
   else:
     g.write(original_line)
 
+# close files
 f.close()
 g.close()
 
-# move the abbreviated file to overwrite the original file
+# move the temporary file to overwrite the original file
 os.remove(orig_file_name)
-os.rename(abbrev_file_name, orig_file_name)
+os.rename(temp_file_name, orig_file_name)
